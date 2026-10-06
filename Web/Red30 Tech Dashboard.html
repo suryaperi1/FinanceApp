@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Red30 Tech — Consolidated Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light;
+    --page:           #f9f9f7;
+    --surface-1:      #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --axis:           #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6; /* blue */
+    --series-2:       #1baf7a; /* aqua */
+    --series-3:       #eda100; /* yellow */
+    --series-4:       #4a3aa7; /* violet */
+    --good:           #006300;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page:           #0d0d0d;
+      --surface-1:      #1a1a19;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --axis:           #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --series-2:       #199e70;
+      --series-3:       #c98500;
+      --series-4:       #9085e9;
+      --good:           #0ca30c;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:           #0d0d0d;
+    --surface-1:      #1a1a19;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #199e70;
+    --series-3:       #c98500;
+    --series-4:       #9085e9;
+    --good:           #0ca30c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 13.5px; max-width: 640px; line-height: 1.5; }
+  .theme-toggle {
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
+    border-radius: 8px; padding: 7px 12px; font-size: 12.5px; cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--text-primary); }
+
+  h2.section-title { font-size: 15px; margin: 34px 0 12px; color: var(--text-primary); display:flex; align-items:baseline; gap:8px; }
+  h2.section-title .section-note { font-size: 12px; font-weight: 400; color: var(--text-muted); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi-label { font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 600; }
+  .kpi-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 4px; }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px 14px;
+  }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .card-title { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+
+  /* line charts */
+  svg.linechart { width: 100%; height: auto; overflow: visible; }
+  .axis-line { stroke: var(--axis); stroke-width: 1; }
+  .line-series { stroke-width: 2; }
+  .line-marker { stroke: var(--surface-1); stroke-width: 2; }
+  .line-marker-forecast { fill: var(--surface-1); stroke-width: 2; stroke-dasharray: none; }
+  .line-forecast { stroke-width: 2; stroke-dasharray: 3 3; opacity: 0.6; }
+  .line-endlabel { font-size: 11px; fill: var(--text-primary); font-weight: 600; }
+  .line-endlabel-forecast { fill: var(--text-secondary); font-weight: 500; }
+  .x-label { font-size: 10px; fill: var(--text-muted); }
+  .x-label-forecast { fill: var(--text-secondary); font-style: italic; }
+
+  /* stacked column charts */
+  svg.stackchart { width: 100%; height: auto; overflow: visible; }
+  .stack-total-label { font-size: 10px; fill: var(--text-secondary); font-weight: 600; }
+
+  /* legend */
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 10px 0 4px; font-size: 11.5px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
+  /* horizontal bars */
+  .hbar-row { display: grid; grid-template-columns: 150px 1fr 74px; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .hbar-label { font-size: 12px; color: var(--text-secondary); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hbar-track { background: var(--gridline); border-radius: 4px; height: 14px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 4px; }
+  .hbar-value { font-size: 12px; color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .notes {
+    margin-top: 34px; padding: 16px 18px; border-radius: 10px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .notes h3 { font-size: 12.5px; color: var(--text-primary); margin: 0 0 8px; }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { margin-bottom: 4px; }
+
+  footer.page-footer { margin-top: 26px; font-size: 11.5px; color: var(--text-muted); text-align: center; }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Red30 Tech — Consolidated Dashboard</h1>
+      <div class="subtitle">Built from the 10 workbooks in this folder: five-year corporate financials (2014–2018 + 2019 budget), 2018 expense detail, and two years of e-commerce transaction history (Sep 2017–Aug 2019). Figures from the corporate financial workbooks are stated in the source files as thousands of US dollars; e-commerce and product-catalog figures are actual dollars from a separate transactional snapshot.</div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi-tile">
+  <div class="kpi-label">2018 Revenue</div>
+  <div class="kpi-value">$1.01B</div>
+  <div class="kpi-sub">Corporate financials, FY2018</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">2018 Net Income</div>
+  <div class="kpi-value">$48.6M</div>
+  <div class="kpi-sub">4.8% net margin</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">2019 Budget Growth</div>
+  <div class="kpi-value">+2.3%</div>
+  <div class="kpi-sub">vs. FY2018 actual revenue</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">2018 Labor Cost</div>
+  <div class="kpi-value">$364.1M</div>
+  <div class="kpi-sub">11 departments, incl. contractors</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">2018 Marketing Spend</div>
+  <div class="kpi-value">$88.1M</div>
+  <div class="kpi-sub">Labor + paid activities</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">2018 Overhead Cost</div>
+  <div class="kpi-value">$214.4M</div>
+  <div class="kpi-sub">Variable + fixed costs</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">E-Commerce Orders</div>
+  <div class="kpi-value">$6.9M</div>
+  <div class="kpi-sub">4,976 orders, Sep 2017–Aug 2019</div>
+</div>
+<div class="kpi-tile">
+  <div class="kpi-label">Customers on File</div>
+  <div class="kpi-value">2,343</div>
+  <div class="kpi-sub">1,990 individual + 353 business</div>
+</div>
+  </div>
+
+  <h2 class="section-title">Five-Year Financial Performance <span class="section-note">2014–2018 actual, 2019 budget shown as forecast point</span></h2>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Gross Revenue</div>
+      <svg viewBox="0 0 300 140" class="linechart" role="img" aria-label="2014 trend">
+<line x1="42" y1="116.0" x2="286" y2="116.0" class="axis-line"/>
+<path d="M 42.0,106.3 L 90.8,104.3 L 139.6,81.5 L 188.4,59.4 L 237.2,41.2" fill="none" class="line-series" style="stroke:var(--series-1)"/>
+<circle cx="42.0" cy="106.3" r="4" class="line-marker" style="fill:var(--series-1)"/>
+<circle cx="90.8" cy="104.3" r="4" class="line-marker" style="fill:var(--series-1)"/>
+<circle cx="139.6" cy="81.5" r="4" class="line-marker" style="fill:var(--series-1)"/>
+<circle cx="188.4" cy="59.4" r="4" class="line-marker" style="fill:var(--series-1)"/>
+<circle cx="237.2" cy="41.2" r="4" class="line-marker" style="fill:var(--series-1)"/>
+<line x1="237.2" y1="41.2" x2="286.0" y2="25.7" class="line-forecast" style="stroke:var(--series-1)"/>
+<circle cx="286.0" cy="25.7" r="4" class="line-marker-forecast" style="stroke:var(--series-1)"/>
+<text x="237.2" y="31.2" class="line-endlabel" text-anchor="middle">$1.01B</text>
+<text x="286.0" y="15.7" class="line-endlabel line-endlabel-forecast" text-anchor="middle">$1.04B</text>
+<text x="42.0" y="134" class="x-label" text-anchor="middle">2014</text>
+<text x="90.8" y="134" class="x-label" text-anchor="middle">2015</text>
+<text x="139.6" y="134" class="x-label" text-anchor="middle">2016</text>
+<text x="188.4" y="134" class="x-label" text-anchor="middle">2017</text>
+<text x="237.2" y="134" class="x-label" text-anchor="middle">2018</text>
+<text x="286.0" y="134" class="x-label x-label-forecast" text-anchor="middle">2019B</text>
+</svg>
+    </div>
+    <div class="card">
+      <div class="card-title">Net Income</div>
+      <svg viewBox="0 0 300 140" class="linechart" role="img" aria-label="2014 trend">
+<line x1="42" y1="116.0" x2="286" y2="116.0" class="axis-line"/>
+<path d="M 42.0,66.5 L 90.8,106.3 L 139.6,88.9 L 188.4,45.6 L 237.2,34.8" fill="none" class="line-series" style="stroke:var(--series-2)"/>
+<circle cx="42.0" cy="66.5" r="4" class="line-marker" style="fill:var(--series-2)"/>
+<circle cx="90.8" cy="106.3" r="4" class="line-marker" style="fill:var(--series-2)"/>
+<circle cx="139.6" cy="88.9" r="4" class="line-marker" style="fill:var(--series-2)"/>
+<circle cx="188.4" cy="45.6" r="4" class="line-marker" style="fill:var(--series-2)"/>
+<circle cx="237.2" cy="34.8" r="4" class="line-marker" style="fill:var(--series-2)"/>
+<line x1="237.2" y1="34.8" x2="286.0" y2="25.7" class="line-forecast" style="stroke:var(--series-2)"/>
+<circle cx="286.0" cy="25.7" r="4" class="line-marker-forecast" style="stroke:var(--series-2)"/>
+<text x="237.2" y="24.8" class="line-endlabel" text-anchor="middle">$48.6M</text>
+<text x="286.0" y="15.7" class="line-endlabel line-endlabel-forecast" text-anchor="middle">$51.6M</text>
+<text x="42.0" y="134" class="x-label" text-anchor="middle">2014</text>
+<text x="90.8" y="134" class="x-label" text-anchor="middle">2015</text>
+<text x="139.6" y="134" class="x-label" text-anchor="middle">2016</text>
+<text x="188.4" y="134" class="x-label" text-anchor="middle">2017</text>
+<text x="237.2" y="134" class="x-label" text-anchor="middle">2018</text>
+<text x="286.0" y="134" class="x-label x-label-forecast" text-anchor="middle">2019B</text>
+</svg>
+    </div>
+    <div class="card">
+      <div class="card-title">Gross Margin</div>
+      <svg viewBox="0 0 300 140" class="linechart" role="img" aria-label="2014 trend">
+<line x1="42" y1="116.0" x2="286" y2="116.0" class="axis-line"/>
+<path d="M 42.0,25.7 L 90.8,78.7 L 139.6,100.6 L 188.4,106.3 L 237.2,92.0" fill="none" class="line-series" style="stroke:var(--series-3)"/>
+<circle cx="42.0" cy="25.7" r="4" class="line-marker" style="fill:var(--series-3)"/>
+<circle cx="90.8" cy="78.7" r="4" class="line-marker" style="fill:var(--series-3)"/>
+<circle cx="139.6" cy="100.6" r="4" class="line-marker" style="fill:var(--series-3)"/>
+<circle cx="188.4" cy="106.3" r="4" class="line-marker" style="fill:var(--series-3)"/>
+<circle cx="237.2" cy="92.0" r="4" class="line-marker" style="fill:var(--series-3)"/>
+<line x1="237.2" y1="92.0" x2="286.0" y2="44.0" class="line-forecast" style="stroke:var(--series-3)"/>
+<circle cx="286.0" cy="44.0" r="4" class="line-marker-forecast" style="stroke:var(--series-3)"/>
+<text x="237.2" y="82.0" class="line-endlabel" text-anchor="middle">62.2%</text>
+<text x="286.0" y="34.0" class="line-endlabel line-endlabel-forecast" text-anchor="middle">63.2%</text>
+<text x="42.0" y="134" class="x-label" text-anchor="middle">2014</text>
+<text x="90.8" y="134" class="x-label" text-anchor="middle">2015</text>
+<text x="139.6" y="134" class="x-label" text-anchor="middle">2016</text>
+<text x="188.4" y="134" class="x-label" text-anchor="middle">2017</text>
+<text x="237.2" y="134" class="x-label" text-anchor="middle">2018</text>
+<text x="286.0" y="134" class="x-label x-label-forecast" text-anchor="middle">2019B</text>
+</svg>
+    </div>
+  </div>
+
+  <h2 class="section-title">Balance Sheet Composition <span class="section-note">$ thousands, shared scale across both charts</span></h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Assets — Cash vs. Working Capital vs. Long-Term Assets</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-1)"></span>Cash</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-2)"></span>Working Capital (AR + Inventory + Prepaid)</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-3)"></span>Long-Term Assets (PP&E + Investments + Goodwill + Other)</span>
+      </div>
+      <svg viewBox="0 0 386 242" class="stackchart" role="img" aria-label="Stacked composition by year">
+<line x1="38" y1="194.0" x2="380" y2="194.0" class="axis-line"/>
+<rect x="46.0" y="130.6" width="42" height="61.4" rx="2" style="fill:var(--series-1)"/>
+<rect x="46.0" y="104.5" width="42" height="22.2" rx="2" style="fill:var(--series-2)"/>
+<rect x="46.0" y="57.8" width="42" height="42.6" rx="2" style="fill:var(--series-3)"/>
+<text x="67.0" y="236" class="x-label" text-anchor="middle">2014</text>
+<text x="67.0" y="55.8" class="stack-total-label" text-anchor="middle">$303.9M</text>
+<rect x="114.0" y="128.3" width="42" height="63.7" rx="2" style="fill:var(--series-1)"/>
+<rect x="114.0" y="97.5" width="42" height="26.8" rx="2" style="fill:var(--series-2)"/>
+<rect x="114.0" y="48.3" width="42" height="45.2" rx="2" style="fill:var(--series-3)"/>
+<text x="135.0" y="236" class="x-label" text-anchor="middle">2015</text>
+<text x="135.0" y="46.3" class="stack-total-label" text-anchor="middle">$325.8M</text>
+<rect x="182.0" y="124.8" width="42" height="67.2" rx="2" style="fill:var(--series-1)"/>
+<rect x="182.0" y="92.1" width="42" height="28.6" rx="2" style="fill:var(--series-2)"/>
+<rect x="182.0" y="37.6" width="42" height="50.6" rx="2" style="fill:var(--series-3)"/>
+<text x="203.0" y="236" class="x-label" text-anchor="middle">2016</text>
+<text x="203.0" y="35.6" class="stack-total-label" text-anchor="middle">$350.5M</text>
+<rect x="250.0" y="120.8" width="42" height="71.2" rx="2" style="fill:var(--series-1)"/>
+<rect x="250.0" y="80.7" width="42" height="36.1" rx="2" style="fill:var(--series-2)"/>
+<rect x="250.0" y="21.6" width="42" height="55.1" rx="2" style="fill:var(--series-3)"/>
+<text x="271.0" y="236" class="x-label" text-anchor="middle">2017</text>
+<text x="271.0" y="19.6" class="stack-total-label" text-anchor="middle">$387.2M</text>
+<rect x="318.0" y="114.5" width="42" height="77.5" rx="2" style="fill:var(--series-1)"/>
+<rect x="318.0" y="71.6" width="42" height="38.9" rx="2" style="fill:var(--series-2)"/>
+<rect x="318.0" y="6.0" width="42" height="61.6" rx="2" style="fill:var(--series-3)"/>
+<text x="339.0" y="236" class="x-label" text-anchor="middle">2018</text>
+<text x="339.0" y="4.0" class="stack-total-label" text-anchor="middle">$423.1M</text>
+</svg>
+    </div>
+    <div class="card">
+      <div class="card-title">Liabilities vs. Equity</div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-1)"></span>Liabilities</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:var(--series-2)"></span>Equity</span>
+      </div>
+      <svg viewBox="0 0 386 242" class="stackchart" role="img" aria-label="Stacked composition by year">
+<line x1="38" y1="194.0" x2="380" y2="194.0" class="axis-line"/>
+<rect x="46.0" y="112.6" width="42" height="79.4" rx="2" style="fill:var(--series-1)"/>
+<rect x="46.0" y="59.8" width="42" height="48.7" rx="2" style="fill:var(--series-2)"/>
+<text x="67.0" y="236" class="x-label" text-anchor="middle">2014</text>
+<text x="67.0" y="55.8" class="stack-total-label" text-anchor="middle">$303.9M</text>
+<rect x="114.0" y="114.8" width="42" height="77.2" rx="2" style="fill:var(--series-1)"/>
+<rect x="114.0" y="50.3" width="42" height="60.5" rx="2" style="fill:var(--series-2)"/>
+<text x="135.0" y="236" class="x-label" text-anchor="middle">2015</text>
+<text x="135.0" y="46.3" class="stack-total-label" text-anchor="middle">$325.8M</text>
+<rect x="182.0" y="117.7" width="42" height="74.3" rx="2" style="fill:var(--series-1)"/>
+<rect x="182.0" y="39.6" width="42" height="74.1" rx="2" style="fill:var(--series-2)"/>
+<text x="203.0" y="236" class="x-label" text-anchor="middle">2016</text>
+<text x="203.0" y="35.6" class="stack-total-label" text-anchor="middle">$350.5M</text>
+<rect x="250.0" y="121.9" width="42" height="70.1" rx="2" style="fill:var(--series-1)"/>
+<rect x="250.0" y="23.6" width="42" height="94.3" rx="2" style="fill:var(--series-2)"/>
+<text x="271.0" y="236" class="x-label" text-anchor="middle">2017</text>
+<text x="271.0" y="19.6" class="stack-total-label" text-anchor="middle">$387.2M</text>
+<rect x="318.0" y="127.6" width="42" height="64.4" rx="2" style="fill:var(--series-1)"/>
+<rect x="318.0" y="8.0" width="42" height="115.6" rx="2" style="fill:var(--series-2)"/>
+<text x="339.0" y="236" class="x-label" text-anchor="middle">2018</text>
+<text x="339.0" y="4.0" class="stack-total-label" text-anchor="middle">$423.1M</text>
+</svg>
+    </div>
+  </div>
+
+  <h2 class="section-title">2018 Expense Breakdown <span class="section-note">$ thousands</span></h2>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Labor Cost by Department</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Sales</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$42.6M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Administrative</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:94.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$40.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Other</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:88.2%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$37.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Operations</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:85.1%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$36.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Marketing</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:83.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$35.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Information Technology</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:82.3%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$35.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Contractors</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:79.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$33.9M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Executive</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:71.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$30.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Human Resources</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:63.4%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$27.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Finance</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:58.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$24.9M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Learning & Development</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:48.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$20.8M</div>
+</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Marketing Spend by Category</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Marketing Labor</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$35.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Advertising</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:66.2%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$23.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Social Media</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:41.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$14.8M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Public Relations</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:24.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$8.8M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Market Research</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:15.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$5.6M</div>
+</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Overhead Cost by Category</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Salaries and Wages</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$72.8M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Rent</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:72.1%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$52.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Marketing and Advertising</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:64.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$47.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Utilities</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:22.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$16.6M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Taxes</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:9.9%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$7.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Research and Development</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:7.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$5.6M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Interest</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:5.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$4.1M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Travel</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:2.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$2.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Other (Supplies/Insurance/Phone/Maint./Depr.)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:8.9%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$6.5M</div>
+</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">E-Commerce Sales Performance <span class="section-note">Sep 2017 – Aug 2019, 4,976 orders, $6.9M total</span></h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Revenue by Sales Region</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Central East</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$1.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Northeast</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:97.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$1.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">N Central East</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:85.2%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$1.1M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Southeast</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:66.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$826K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">S Central East</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:66.3%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$824K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Southwest</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:52.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$655K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Northwest</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:48.1%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$597K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">S Central West</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:29.3%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$365K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">N Central West</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:9.5%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$118K</div>
+</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue by Product Category</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Robots</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$2.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Drones</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:73.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$1.8M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Robot Kits</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:46.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$1.2M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Drone Kits</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:27.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$683K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Training Videos</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:16.9%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$417K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Other categories</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:14.4%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$356K</div>
+</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Wholesale vs. Retail Channel</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Wholesale</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$6.1M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Retail</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:12.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$782K</div>
+</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top 5 Sales Representatives</div>
+      <div class="hbar-row">
+  <div class="hbar-label">Janey Ebunoluwa</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$386K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Anthony Smallpeace</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:86.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$335K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Ben Dywer</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:84.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$327K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Gilbert Morales</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:75.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$292K</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Michele Cornes</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:73.8%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$285K</div>
+</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Product Catalog <span class="section-note">Top revenue SKUs, separate 100-item catalog snapshot</span></h2>
+  <div class="card">
+    <div class="card-title">Top 8 Products by Revenue</div>
+    <div class="hbar-row">
+  <div class="hbar-label">RED30 Project (Software)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:100.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$8.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Red30 Professional (Software)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:94.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$8.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">InfraRED Smart Monitor 27" (Hardware)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:57.2%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$4.8M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Red30 Home (Software)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:54.3%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$4.6M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">BYOR-4005 (Robot Kits)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:53.4%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$4.5M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">Red30 Virus Protection - Biz Pro (Software)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:47.7%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$4.0M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">RED Smart Thermostat (Smart Home)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:46.6%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$3.9M</div>
+</div>
+<div class="hbar-row">
+  <div class="hbar-label">InfraRED Smart Monitor 32" (Hardware)</div>
+  <div class="hbar-track"><div class="hbar-fill" style="width:42.0%; background:var(--series-1)"></div></div>
+  <div class="hbar-value">$3.6M</div>
+</div>
+  </div>
+
+  <div class="notes">
+    <h3>Data notes</h3>
+    <ul>
+      <li>Corporate financials (Balance Sheet, Financial Statement, Budget, Labor/Marketing/Overhead Expenses) are stated in thousands of US dollars and tie together internally — e.g. 2018 total labor expense ($364.1M) matches the Salaries and Wages line in the Financial Statement exactly.</li>
+      <li>The e-commerce transaction files and the Product Line catalog are a <em>separate</em> dataset, in actual dollars, and do not reconcile to the corporate financial statements — treat them as an operational/CRM snapshot, not GAAP-consistent revenue.</li>
+      <li>The Balance Sheet's "Balance check" row never resolves to exactly zero (off by ~$0.30–0.44K each year) — rounding artifacts in the source file, not a real imbalance.</li>
+      <li>Overhead Costs.xlsx's 2018 tab title reads "Red30 Tech <strong>2017</strong> Overhead Costs" — a copy-paste label error in the source; the monthly dates and figures on that tab are for 2018.</li>
+      <li><code>marketing_rubric.pdf</code> in this folder is unrelated to the Red30 Tech dataset series — a generic document-scoring rubric, likely a stray file.</li>
+    </ul>
+  </div>
+
+  <footer class="page-footer">Generated from the workbooks in this folder · static snapshot, not connected to live data</footer>
+</div>
+
+<script>
+  (function() {
+    var btn = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    var stored = localStorage.getItem('red30-theme');
+    if (stored) root.setAttribute('data-theme', stored);
+    btn.addEventListener('click', function() {
+      var current = root.getAttribute('data-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var next;
+      if (!current) next = prefersDark ? 'light' : 'dark';
+      else next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('red30-theme', next);
+    });
+  })();
+</script>
+</body>
+</html>
