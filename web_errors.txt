@@ -1,0 +1,101 @@
+Web  LOG  Running application "main" with appParams:
+ {"hydrate": undefined, "rootTag": "#root"}
+Development-level warnings: ON.
+Performance optimizations: OFF.
+Web  WARN  TouchableMixin is deprecated. Please use Pressable.
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)
+Web  ERROR
+
+Code: TrendLineChart.tsx
+  118 |             </SvgText>
+  119 |             {/* Hit target larger than the mark: the full-height column around the point. */}
+> 120 |             <Path
+      |             ^
+  121 |               d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
+  122 |               fill="transparent"
+  123 |               onPress={() => setSelected(i)}
+Call Stack
+  points.map$argument_0 (src\components\TrendLineChart.tsx:120:13)
+  TrendLineChart (src\components\TrendLineChart.tsx:82:17)
+  FinancialPerformanceScreen (src\app\financial-performance.tsx:16:9)
+  ThemedStack (src\app\_layout.tsx:13:7)
+  RootLayout (src\app\_layout.tsx:38:9)

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Text as SvgText } from 'react-native-svg';
 
+import { ColumnHitTargets } from './ColumnHitTargets';
+
 import { chartFontFamily } from '../theme/fonts';
 import { useTheme } from '../theme/ThemeProvider';
 import type { TrendPoint } from '../types/dashboard';
@@ -53,78 +55,83 @@ export function TrendLineChart({ points, color, format }: Props) {
 
   return (
     <View>
-      <Svg
-        width="100%"
-        style={{ aspectRatio: W / H }}
-        viewBox={`0 0 ${W} ${H}`}
-        accessibilityLabel={points.map((p) => `${p.label} ${format(p.value)}`).join(', ')}
-      >
-        <Line x1={X0} y1={BASELINE} x2={X1} y2={BASELINE} stroke={colors.axis} strokeWidth={1} />
+      <View style={styles.plot}>
+        <Svg
+          width="100%"
+          style={{ aspectRatio: W / H }}
+          viewBox={`0 0 ${W} ${H}`}
+          accessibilityLabel={points.map((p) => `${p.label} ${format(p.value)}`).join(', ')}
+        >
+          <Line x1={X0} y1={BASELINE} x2={X1} y2={BASELINE} stroke={colors.axis} strokeWidth={1} />
 
-        <Path d={actualPath} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+          <Path d={actualPath} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
 
-        {points.map((p, i) =>
-          p.forecast && i > 0 ? (
-            <Line
-              key={`f-${p.label}`}
-              x1={xy[i - 1].x}
-              y1={xy[i - 1].y}
-              x2={xy[i].x}
-              y2={xy[i].y}
-              stroke={color}
-              strokeWidth={2}
-              strokeDasharray="3 3"
-              opacity={0.6}
-            />
-          ) : null,
-        )}
+          {points.map((p, i) =>
+            p.forecast && i > 0 ? (
+              <Line
+                key={`f-${p.label}`}
+                x1={xy[i - 1].x}
+                y1={xy[i - 1].y}
+                x2={xy[i].x}
+                y2={xy[i].y}
+                stroke={color}
+                strokeWidth={2}
+                strokeDasharray="3 3"
+                opacity={0.6}
+              />
+            ) : null,
+          )}
 
-        {points.map((p, i) => (
-          <G key={p.label}>
-            {selected === i ? (
-              <Line x1={xy[i].x} y1={xy[i].y + 6} x2={xy[i].x} y2={BASELINE} stroke={colors.axis} strokeWidth={1} />
-            ) : null}
-            <Circle
-              cx={xy[i].x}
-              cy={xy[i].y}
-              r={4}
-              fill={p.forecast ? colors.surface : color}
-              stroke={p.forecast ? color : colors.surface}
-              strokeWidth={2}
-            />
-            {labelled.has(i) ? (
+          {points.map((p, i) => (
+            <G key={p.label}>
+              {selected === i ? (
+                <Line x1={xy[i].x} y1={xy[i].y + 6} x2={xy[i].x} y2={BASELINE} stroke={colors.axis} strokeWidth={1} />
+              ) : null}
+              <Circle
+                cx={xy[i].x}
+                cy={xy[i].y}
+                r={4}
+                fill={p.forecast ? colors.surface : color}
+                stroke={p.forecast ? color : colors.surface}
+                strokeWidth={2}
+              />
+              {labelled.has(i) ? (
+                <SvgText
+                  fontFamily={chartFontFamily}
+                  x={xy[i].x}
+                  y={xy[i].y - 10}
+                  fontSize={11}
+                  fontWeight={p.forecast ? '500' : '600'}
+                  fill={p.forecast ? colors.textSecondary : colors.textPrimary}
+                  textAnchor="middle"
+                >
+                  {format(p.value)}
+                </SvgText>
+              ) : null}
               <SvgText
-                fontFamily={chartFontFamily}
+                  fontFamily={chartFontFamily}
                 x={xy[i].x}
-                y={xy[i].y - 10}
-                fontSize={11}
-                fontWeight={p.forecast ? '500' : '600'}
-                fill={p.forecast ? colors.textSecondary : colors.textPrimary}
+                y={X_LABEL_Y}
+                fontSize={10}
+                fontStyle={p.forecast ? 'italic' : 'normal'}
+                fill={p.forecast ? colors.textSecondary : colors.textMuted}
                 textAnchor="middle"
               >
-                {format(p.value)}
+                {p.label}
               </SvgText>
-            ) : null}
-            <SvgText
-                fontFamily={chartFontFamily}
-              x={xy[i].x}
-              y={X_LABEL_Y}
-              fontSize={10}
-              fontStyle={p.forecast ? 'italic' : 'normal'}
-              fill={p.forecast ? colors.textSecondary : colors.textMuted}
-              textAnchor="middle"
-            >
-              {p.label}
-            </SvgText>
-            {/* Hit target larger than the mark: the full-height column around the point. */}
-            <Path
-              d={`M ${xy[i].x - step / 2},0 h ${step || 24} v ${H} h ${-(step || 24)} Z`}
-              fill="transparent"
-              onPress={() => setSelected(i)}
-            />
-          </G>
-        ))}
-      </Svg>
+            </G>
+          ))}
+        </Svg>
+        {/* Hit targets larger than the marks: the full-height column around each point. */}
+        <ColumnHitTargets
+          centers={xy.map((pt) => pt.x)}
+          columnWidth={step || W}
+          viewBoxWidth={W}
+          labels={points.map((p) => `${p.label}${p.forecast ? ' (budget)' : ''}: ${format(p.value)}`)}
+          selected={selected}
+          onSelect={setSelected}
+        />
+      </View>
       {sel ? (
         <Text style={[styles.caption, { color: colors.textSecondary }]}>
           <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>{sel.label}</Text>
@@ -136,5 +143,6 @@ export function TrendLineChart({ points, color, format }: Props) {
 }
 
 const styles = StyleSheet.create({
+  plot: { position: 'relative' },
   caption: { fontSize: 12, marginTop: 6 },
 });
