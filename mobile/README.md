@@ -82,3 +82,35 @@ Build-time only: `xlsx` (SheetJS, installed from the official SheetJS CDN), `tsx
 
 Charts are small hand-written SVG components — no chart library — so they match the web
 dashboard's palette and styling in both light and dark mode.
+
+## Security notes
+
+**Do not run `npm audit fix --force`.** It ignores Expo's version constraints and "fixes"
+advisories by downgrading core packages (e.g. `expo` 57 → 44, `react-native` 0.86 → 0.72),
+which breaks the app. If it happens, restore with
+`git restore package.json package-lock.json && npm install`.
+
+`npm audit` reports high/moderate findings that come from Expo SDK 57's own dependencies
+(as of Oct 2026). They have no safe fix in this project:
+
+| Package | Pulled in by | Where it runs | Why it isn't fixed here |
+|---|---|---|---|
+| `braces` | Metro bundler | Dev machine only | No patched release exists |
+| `node-forge` | Expo CLI code signing | Dev machine only | No patched release exists |
+| `uuid` | iOS project tooling (`xcode`) | Dev machine / build only | Fix is a major-version jump the tooling doesn't support |
+| `decode-uri-component` | `expo-router` → `query-string` | In the app (deep-link parsing) | Fixed version is ESM-only and breaks `query-string` |
+
+The other flagged packages are only listed because they depend on one of these four.
+Practical risk is low: three never ship in the app, and the app itself has no login,
+network calls or user data — the worst case is a malformed `red30://` link slowing it down.
+
+To pick up fixes as Expo releases them:
+
+```bash
+npx expo install --fix         # move to the latest SDK-compatible patch versions
+npx expo install expo@latest   # when upgrading to a new Expo SDK, then run --fix again
+npx expo-doctor                # confirm dependencies are consistent
+```
+
+Routine `npm install` warnings (deprecated packages, peer-dependency notices) are normal for
+React Native projects and need no action.
