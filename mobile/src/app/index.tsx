@@ -14,10 +14,10 @@ export default function ConsolidatedDashboard() {
   const { colors, toggle } = useTheme();
 
   return (
-    <Screen padTop>
+    <Screen padTop testID="dashboard-screen">
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={[styles.h1, { color: colors.textPrimary }]} accessibilityRole="header">
+          <Text style={[styles.h1, { color: colors.textPrimary }]} accessibilityRole="header" testID="dashboard-title">
             Red30 Tech — Consolidated Dashboard
           </Text>
         </View>
@@ -42,6 +42,7 @@ export default function ConsolidatedDashboard() {
           onPress={() => router.push(s.href)}
           accessibilityRole="link"
           accessibilityLabel={`${s.title}. ${s.summary}`}
+          testID={s.testID}
           style={({ pressed }) => [
             styles.navCard,
             { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },

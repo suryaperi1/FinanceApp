@@ -8,7 +8,7 @@ import type { Kpi } from '../types/dashboard';
 export function KpiGrid({ kpis }: { kpis: Kpi[] }) {
   const { colors } = useTheme();
   return (
-    <View style={styles.grid}>
+    <View style={styles.grid} testID="kpi-grid">
       {kpis.map((k) => (
         <View
           key={k.label}

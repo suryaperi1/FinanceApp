@@ -1,0 +1,17 @@
+{
+  "consolidatedDashboard": {
+    "title": "Red30 Tech — Consolidated Dashboard",
+    "titleKeyword": "Consolidated Dashboard"
+  },
+  "sections": {
+    "financialPerformance": {
+      "title": "Five-Year Financial Performance",
+      "navTestId": "nav-financial-performance",
+      "charts": [
+        { "title": "Gross Revenue", "testId": "chart-gross-revenue" },
+        { "title": "Net Income", "testId": "chart-net-income" },
+        { "title": "Gross Margin", "testId": "chart-gross-margin" }
+      ]
+    }
+  }
+}

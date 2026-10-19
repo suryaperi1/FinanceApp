@@ -10,15 +10,15 @@ export default function FinancialPerformanceScreen() {
   const fp = dashboard.financialPerformance;
 
   return (
-    <Screen>
+    <Screen testID="financial-performance-screen">
       <SectionHeader note={fp.note} />
-      <Card title="Gross Revenue">
+      <Card title="Gross Revenue" testID="chart-gross-revenue">
         <TrendLineChart points={fp.grossRevenue} color={colors.series[0]} format={fmtUsd} />
       </Card>
-      <Card title="Net Income">
+      <Card title="Net Income" testID="chart-net-income">
         <TrendLineChart points={fp.netIncome} color={colors.series[1]} format={fmtUsd} />
       </Card>
-      <Card title="Gross Margin">
+      <Card title="Gross Margin" testID="chart-gross-margin">
         <TrendLineChart points={fp.grossMargin} color={colors.series[2]} format={(v) => fmtPct(v)} />
       </Card>
       <BackToDashboard />

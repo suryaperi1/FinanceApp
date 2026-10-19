@@ -30,11 +30,14 @@
     "prestart": "npm run build:data",
     "start": "expo start",
     "preandroid": "npm run build:data",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "preios": "npm run build:data",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "expo lint",
+    "e2e:android": "npm --prefix src/e2e_tests run test:android",
+    "e2e:ios": "npm --prefix src/e2e_tests run test:ios"
   },
   "private": true
 }

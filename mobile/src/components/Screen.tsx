@@ -6,11 +6,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
 
 /** Scrollable page body with the app background and bottom safe-area padding. */
-export function Screen({ children, padTop = false }: { children: ReactNode; padTop?: boolean }) {
+export function Screen({
+  children,
+  padTop = false,
+  testID,
+}: {
+  children: ReactNode;
+  padTop?: boolean;
+  testID?: string;
+}) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   return (
     <ScrollView
+      testID={testID}
       style={{ backgroundColor: colors.page }}
       contentContainerStyle={[
         styles.content,
@@ -33,6 +42,7 @@ export function BackToDashboard() {
     <Pressable
       onPress={goHome}
       accessibilityRole="link"
+      testID="back-to-dashboard"
       style={({ pressed }) => [
         styles.back,
         { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.6 : 1 },

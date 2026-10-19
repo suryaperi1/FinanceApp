@@ -49,6 +49,8 @@ Other scripts:
 |---|---|
 | `npm run build:data` | Regenerate `src/data/dashboard.json` from the workbooks |
 | `npm run typecheck` | TypeScript check of the app and the data script |
+| `npm run lint` | ESLint (Expo config) |
+| `npm run e2e:android` / `npm run e2e:ios` | Appium end-to-end tests — see `src/e2e_tests/README.md` |
 
 Installable builds: `npx eas-cli@latest build -p android` (or `-p ios`) — see the Expo EAS docs.
 
@@ -67,12 +69,23 @@ mobile/
     │   ├── expenses.tsx
     │   ├── ecommerce.tsx
     │   └── product-catalog.tsx
+    ├── e2e_tests/           Appium + WebdriverIO UI tests (own package.json; not bundled into the app)
     ├── components/          Card, KpiGrid, HBarList, TrendLineChart, StackedColumnChart, …
     ├── data/                dashboard.json (generated) + typed accessor
     ├── lib/                 number formatting, section list for the main page
     ├── theme/               light/dark color tokens (same as the HTML dashboard)
     └── types/dashboard.ts   JSON schema shared by the script and the app
 ```
+
+## End-to-end tests
+
+Appium + WebdriverIO + TypeScript tests for Android and iOS live in `src/e2e_tests/`, with a
+page-object model, a `data/` folder for expected values, and shared helpers. They run against
+a native Release build (`npx expo run:android --variant release` / `npx expo run:ios
+--configuration Release`). Setup, conventions and how to add tests:
+[`src/e2e_tests/README.md`](src/e2e_tests/README.md).
+
+Screens and components the tests use carry a `testID` prop. Keep these when you refactor UI.
 
 ## Dependencies
 

@@ -6,6 +6,8 @@ import { fmtPct, fmtUsd } from './format';
 export interface SectionLink {
   href: Href;
   title: string;
+  /** Stable id for UI tests (testID of the button on the main page). */
+  testID: string;
   /** One-line teaser shown on the consolidated dashboard button. */
   summary: string;
 }
@@ -38,26 +40,31 @@ function ecommerceSummary(): string {
 export const SECTIONS = {
   financialPerformance: {
     href: '/financial-performance',
+    testID: 'nav-financial-performance',
     title: 'Five-Year Financial Performance',
     summary: revenueSummary(),
   },
   balanceSheet: {
     href: '/balance-sheet',
+    testID: 'nav-balance-sheet',
     title: 'Balance Sheet Composition',
     summary: assetsSummary(),
   },
   expenses: {
     href: '/expenses',
+    testID: 'nav-expenses',
     title: `${d.expenses.year} Expense Breakdown`,
     summary: `Labor, marketing & overhead · largest labor cost: ${d.expenses.labor[0]?.label ?? '—'}`,
   },
   ecommerce: {
     href: '/ecommerce',
+    testID: 'nav-ecommerce',
     title: 'E-Commerce Sales Performance',
     summary: ecommerceSummary(),
   },
   productCatalog: {
     href: '/product-catalog',
+    testID: 'nav-product-catalog',
     title: 'Product Catalog',
     summary: `Top SKU: ${d.productCatalog.topProducts[0]?.label ?? '—'}`,
   },

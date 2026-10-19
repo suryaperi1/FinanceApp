@@ -3,11 +3,15 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
 
-export function Card({ title, children }: { title?: string; children: ReactNode }) {
+export function Card({ title, children, testID }: { title?: string; children: ReactNode; testID?: string }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {title ? <Text style={[styles.title, { color: colors.textSecondary }]}>{title}</Text> : null}
+    <View testID={testID} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {title ? (
+        <Text testID={testID && `${testID}-title`} style={[styles.title, { color: colors.textSecondary }]}>
+          {title}
+        </Text>
+      ) : null}
       {children}
     </View>
   );
